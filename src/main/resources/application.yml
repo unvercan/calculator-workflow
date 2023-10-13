@@ -1,0 +1,41 @@
+# Server
+server:
+  port: 3535
+
+spring:
+  # SQL Database (H2)
+  datasource:
+    url: jdbc:h2:mem:calculator-db
+    driverClassName: org.h2.Driver
+    username: admin
+    password: 12345
+
+  # JPA and Hibernate
+  jpa:
+    hibernate:
+      ddl-auto: update # disabled because of database initializing
+    database-platform: org.hibernate.dialect.H2Dialect
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        globally_quoted_identifiers: true
+
+  # H2
+  h2:
+    console:
+      enabled: true
+      path: /h2
+
+  # Database Initializing
+  sql:
+    init:
+      mode: always
+      platform: h2
+      schema-locations: classpath:sql/schema.sql
+      data-locations: classpath:sql/data.sql
+
+# API Documentation (OpenAPI)
+springdoc:
+  swagger-ui:
+    path: /api-doc
