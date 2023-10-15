@@ -35,6 +35,12 @@ spring:
       schema-locations: classpath:sql/schema.sql
       data-locations: classpath:sql/data.sql
 
+# Logging
+logging:
+  level:
+    root: info
+    tr.unvercanunlu.calculator_workflow.service: debug
+
 # API Documentation (OpenAPI)
 springdoc:
   swagger-ui:
