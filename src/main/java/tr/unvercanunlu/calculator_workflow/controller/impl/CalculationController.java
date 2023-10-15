@@ -1,6 +1,5 @@
 package tr.unvercanunlu.calculator_workflow.controller.impl;
 
-import io.temporal.client.WorkflowClient;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,11 +32,11 @@ public class CalculationController implements ICalculationController {
 
         this.logger.debug("Received Create Calculation Request: " + request);
 
-        ICalculatorWorkflow calculatorWorkflow = createCalculatorWorkflow();
+        ICalculatorWorkflow calculatorWorkflow = WorkflowConfig.getCalculatorWorkflow();
 
         this.logger.info("Calculator Workflow is created.");
 
-        this.logger.info("Process in Calculator Workflow is starting.");
+        this.logger.info("Calculation Process in Calculator Workflow is starting.");
 
         Calculation calculation = calculatorWorkflow.process(request);
 

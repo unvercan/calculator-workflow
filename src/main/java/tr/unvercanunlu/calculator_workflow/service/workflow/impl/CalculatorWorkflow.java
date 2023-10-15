@@ -1,6 +1,5 @@
 package tr.unvercanunlu.calculator_workflow.service.workflow.impl;
 
-import io.temporal.workflow.Workflow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tr.unvercanunlu.calculator_workflow.model.entity.Calculation;
@@ -19,18 +18,18 @@ public class CalculatorWorkflow implements ICalculatorWorkflow {
 
     private final Logger logger = LoggerFactory.getLogger(CalculatorWorkflow.class);
 
-    private final ICalculationActivity calculationActivity =
-            Workflow.newActivityStub(ICalculationActivity.class, WorkflowConfig.Options.Activity.CALCULATION);
+    private final ICalculationActivity calculationActivity = WorkflowConfig.getCalculationActivity();
 
     private final IOperandActivity operandActivity =
             Workflow.newActivityStub(IOperandActivity.class, WorkflowConfig.Options.Activity.OPERAND);
 
-    private final IResultActivity resultActivity =
-            Workflow.newActivityStub(IResultActivity.class, WorkflowConfig.Options.Activity.RESULT);
+    private final IOperandActivity operandActivity = WorkflowConfig.getOperandActivity();
+
+    private final IResultActivity resultActivity = WorkflowConfig.getResultActivity();
 
     @Override
     public Calculation process(CreateCalculationRequest request) {
-        this.logger.info("Process in Calculator Workflow is started.");
+        this.logger.info("Calculation Process in Calculator Workflow is started.");
 
         Calculation calculation = this.calculationActivity.create(request);
 

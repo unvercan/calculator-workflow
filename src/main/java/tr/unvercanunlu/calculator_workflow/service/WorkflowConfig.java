@@ -7,8 +7,13 @@ import io.temporal.client.WorkflowOptions;
 import io.temporal.common.RetryOptions;
 import io.temporal.serviceclient.WorkflowServiceStubs;
 import io.temporal.serviceclient.WorkflowServiceStubsOptions;
+import io.temporal.workflow.Workflow;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import tr.unvercanunlu.calculator_workflow.service.activity.ICalculationActivity;
+import tr.unvercanunlu.calculator_workflow.service.activity.IOperandActivity;
+import tr.unvercanunlu.calculator_workflow.service.activity.IResultActivity;
+import tr.unvercanunlu.calculator_workflow.service.workflow.ICalculatorWorkflow;
 
 import java.time.Duration;
 
@@ -100,6 +105,24 @@ public class WorkflowConfig {
     public static WorkflowClient getClient() {
         WorkflowServiceStubs serviceStubs = WorkflowServiceStubs.newServiceStubs(WorkflowConfig.Options.SERVICE_STUBS);
 
-        return WorkflowClient.newInstance(serviceStubs, Options.CLIENT);
+        return WorkflowClient.newInstance(serviceStubs, WorkflowConfig.Options.CLIENT);
+    }
+
+    public static ICalculatorWorkflow getCalculatorWorkflow() {
+        WorkflowClient client = WorkflowConfig.getClient();
+
+        return client.newWorkflowStub(ICalculatorWorkflow.class, WorkflowConfig.Options.Workflow.CALCULATOR);
+    }
+
+    public static ICalculationActivity getCalculationActivity() {
+        return Workflow.newActivityStub(ICalculationActivity.class, WorkflowConfig.Options.Activity.CALCULATION);
+    }
+
+    public static IOperandActivity getOperandActivity() {
+        return Workflow.newActivityStub(IOperandActivity.class, WorkflowConfig.Options.Activity.OPERAND);
+    }
+
+    public static IResultActivity getResultActivity() {
+        return Workflow.newActivityStub(IResultActivity.class, WorkflowConfig.Options.Activity.RESULT);
     }
 }

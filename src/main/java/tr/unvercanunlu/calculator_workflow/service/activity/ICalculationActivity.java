@@ -2,6 +2,7 @@ package tr.unvercanunlu.calculator_workflow.service.activity;
 
 import io.temporal.activity.ActivityInterface;
 import io.temporal.activity.ActivityMethod;
+import io.temporal.workflow.SignalMethod;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.validation.annotation.Validated;
@@ -20,17 +21,17 @@ public interface ICalculationActivity {
             @NotNull(message = "Create Calculation Request should not be null.")
             CreateCalculationRequest request);
 
-    @ActivityMethod
+    @SignalMethod
     void setOperand(
             @NotNull(message = "Calculation ID should not be null.") UUID calculationId,
             @NotNull(message = "Operand ID should not be null.") UUID operandId);
 
-    @ActivityMethod
+    @SignalMethod
     void setResult(
             @NotNull(message = "Calculation ID should not be null.") UUID calculationId,
             @NotNull(message = "Result ID should not be null.") UUID resultId);
 
-    @ActivityMethod
+    @SignalMethod
     void setDone(
             @NotNull(message = "Calculation ID should not be null.") UUID calculationId,
             @NotNull(message = "Completeness value of Calculation should not be null.") Boolean value);
