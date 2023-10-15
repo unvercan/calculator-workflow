@@ -57,10 +57,4 @@ public class CalculationController implements ICalculationController {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(calculationDto);
     }
-
-    private ICalculatorWorkflow createCalculatorWorkflow() {
-        WorkflowClient client = WorkflowConfig.getClient();
-
-        return client.newWorkflowStub(ICalculatorWorkflow.class, WorkflowConfig.Options.Workflow.CALCULATOR);
-    }
 }
