@@ -6,17 +6,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import tr.unvercanunlu.calculator_workflow.controller.ApiConfig;
 import tr.unvercanunlu.calculator_workflow.controller.ICalculationController;
 import tr.unvercanunlu.calculator_workflow.model.dto.CalculationDto;
 import tr.unvercanunlu.calculator_workflow.model.entity.Calculation;
 import tr.unvercanunlu.calculator_workflow.model.request.CreateCalculationRequest;
+import tr.unvercanunlu.calculator_workflow.repository.ICalculationRepository;
 import tr.unvercanunlu.calculator_workflow.service.WorkflowConfig;
 import tr.unvercanunlu.calculator_workflow.service.workflow.ICalculatorWorkflow;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,6 +25,8 @@ import tr.unvercanunlu.calculator_workflow.service.workflow.ICalculatorWorkflow;
 public class CalculationController implements ICalculationController {
 
     private final Logger logger = LoggerFactory.getLogger(CalculationController.class);
+
+    private final ICalculationRepository calculationRepository;
 
     @Override
     @RequestMapping(method = RequestMethod.POST)
@@ -52,6 +55,55 @@ public class CalculationController implements ICalculationController {
         this.logger.info("Calculation Result is created.");
 
         this.logger.debug("Created Calculation Result: " + calculationDto);
+
+        return ResponseEntity.status(HttpStatus.OK.value())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(calculationDto);
+    }
+
+    @Override
+    @RequestMapping(method = RequestMethod.GET)
+    public ResponseEntity<List<CalculationDto>> retrieveAll() {
+        List<Calculation> calculationList = this.calculationRepository.findAll();
+
+        this.logger.info("All Calculations are fetched from the database.");
+
+        this.logger.debug("Fetched Calculations: " + calculationList);
+
+        List<CalculationDto> calculationDtoList = calculationList.stream()
+                .map(calculation -> CalculationDto.builder()
+                        .id(calculation.getId())
+                        .first(calculation.getOperand().getFirst())
+                        .second(calculation.getOperand().getSecond())
+                        .result(calculation.getResult().getValue())
+                        .operation(calculation.getOperation())
+                        .done(calculation.getDone())
+                        .build())
+                .toList();
+
+        return ResponseEntity.status(HttpStatus.OK.value())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(calculationDtoList);
+    }
+
+    @Override
+    @RequestMapping(path = "/{calculationId}", method = RequestMethod.GET)
+    public ResponseEntity<CalculationDto> retrieve(@PathVariable(name = "calculationId") UUID calculationId) {
+        Calculation calculation = this.calculationRepository.findById(calculationId)
+                .orElseThrow(() -> new RuntimeException("Calculation with " + calculationId + " ID cannot be found."));
+
+        this.logger.info("Calculation with " + calculationId + " ID is fetched from the database.");
+
+        this.logger.debug("Fetched Calculation: " + calculation);
+
+        CalculationDto calculationDto = CalculationDto.builder()
+                .id(calculation.getId())
+                .first(calculation.getOperand().getFirst())
+                .second(calculation.getOperand().getSecond())
+                .result(calculation.getResult().getValue())
+                .operation(calculation.getOperation())
+                .done(calculation.getDone())
+                .build();
 
         return ResponseEntity.status(HttpStatus.OK.value())
                 .contentType(MediaType.APPLICATION_JSON)

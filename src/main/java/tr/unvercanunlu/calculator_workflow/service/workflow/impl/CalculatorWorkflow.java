@@ -20,9 +20,6 @@ public class CalculatorWorkflow implements ICalculatorWorkflow {
 
     private final ICalculationActivity calculationActivity = WorkflowConfig.getCalculationActivity();
 
-    private final IOperandActivity operandActivity =
-            Workflow.newActivityStub(IOperandActivity.class, WorkflowConfig.Options.Activity.OPERAND);
-
     private final IOperandActivity operandActivity = WorkflowConfig.getOperandActivity();
 
     private final IResultActivity resultActivity = WorkflowConfig.getResultActivity();
@@ -61,7 +58,7 @@ public class CalculatorWorkflow implements ICalculatorWorkflow {
 
         calculation.setDone(Boolean.TRUE);
 
-        this.logger.info("Process in Calculator Workflow is completed.");
+        this.logger.info("Calculation Process in Calculator Workflow is completed.");
 
         return calculation;
     }

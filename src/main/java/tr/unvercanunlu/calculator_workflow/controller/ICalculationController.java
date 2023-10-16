@@ -7,6 +7,9 @@ import org.springframework.validation.annotation.Validated;
 import tr.unvercanunlu.calculator_workflow.model.dto.CalculationDto;
 import tr.unvercanunlu.calculator_workflow.model.request.CreateCalculationRequest;
 
+import java.util.List;
+import java.util.UUID;
+
 @Validated
 public interface ICalculationController {
 
@@ -14,5 +17,9 @@ public interface ICalculationController {
             @Valid
             @NotNull(message = "Calculation request should not be null.")
             CreateCalculationRequest request);
+
+    ResponseEntity<List<CalculationDto>> retrieveAll();
+
+    ResponseEntity<CalculationDto> retrieve(@NotNull(message = "Calculation ID should not be null.") UUID calculationId);
 
 }

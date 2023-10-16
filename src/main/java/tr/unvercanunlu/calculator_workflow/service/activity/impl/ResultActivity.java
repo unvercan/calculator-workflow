@@ -32,7 +32,7 @@ public class ResultActivity implements IResultActivity {
         Operation operation = this.operationRepository.findById(request.getOperationCode())
                 .orElseThrow(() -> new RuntimeException("Operation with " + request.getOperationCode() + " Code cannot be found."));
 
-        this.logger.info("Operation with " + request.getOperationCode() + " Code  is fetched from the database.");
+        this.logger.info("Operation with " + request.getOperationCode() + " Code is fetched from the database.");
 
         this.logger.debug("Fetched Operation: " + operation);
 
