@@ -149,8 +149,8 @@ public class CalculationController implements ICalculationController {
     }
 
     @Override
-    @RequestMapping(path = "/{calculationId}", method = RequestMethod.GET)
-    public ResponseEntity<CalculationDto> retrieve(@PathVariable(name = "calculationId") UUID calculationId) {
+    @RequestMapping(path = "/{id}", method = RequestMethod.GET)
+    public ResponseEntity<CalculationDto> retrieve(@PathVariable(name = "id") UUID calculationId) {
         Calculation calculation = this.calculationRepository.findById(calculationId)
                 .orElseThrow(() -> new RuntimeException("Calculation with " + calculationId + " ID cannot be found."));
 

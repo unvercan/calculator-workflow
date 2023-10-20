@@ -41,8 +41,8 @@ public class OperationController implements IOperationController {
     }
 
     @Override
-    @RequestMapping(path = "/{operationCode}", method = RequestMethod.GET)
-    public ResponseEntity<Operation> retrieve(@PathVariable(name = "operationCode") Integer operationCode) {
+    @RequestMapping(path = "/{code}", method = RequestMethod.GET)
+    public ResponseEntity<Operation> retrieve(@PathVariable(name = "code") Integer operationCode) {
         Operation operation = this.operationRepository.findById(operationCode)
                 .orElseThrow(() -> new RuntimeException("Operation with " + operationCode + " Code cannot be found."));
 

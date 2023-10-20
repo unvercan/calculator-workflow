@@ -15,12 +15,12 @@ public interface ICalculationController {
 
     ResponseEntity<CalculationDto> create(
             @Valid
-            @NotNull(message = "Calculation request should not be null.")
+            @NotNull(message = "Create Calculation Request should not be null.")
             CreateCalculationRequest request);
 
     ResponseEntity<CalculationDto> createAsync(
             @Valid
-            @NotNull(message = "Calculation request should not be null.")
+            @NotNull(message = "Create Calculation Request should not be null.")
             CreateCalculationRequest request);
 
 
