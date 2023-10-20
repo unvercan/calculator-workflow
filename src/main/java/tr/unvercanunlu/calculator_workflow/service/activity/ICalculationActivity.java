@@ -32,7 +32,7 @@ public interface ICalculationActivity {
             @NotNull(message = "Result ID should not be null.") UUID resultId);
 
     @SignalMethod
-    void setDone(
+    void setCompleteness(
             @NotNull(message = "Calculation ID should not be null.") UUID calculationId,
             @NotNull(message = "Completeness value of Calculation should not be null.") Boolean value);
 

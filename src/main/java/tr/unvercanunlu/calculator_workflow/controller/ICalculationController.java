@@ -18,6 +18,12 @@ public interface ICalculationController {
             @NotNull(message = "Calculation request should not be null.")
             CreateCalculationRequest request);
 
+    ResponseEntity<CalculationDto> createAsync(
+            @Valid
+            @NotNull(message = "Calculation request should not be null.")
+            CreateCalculationRequest request);
+
+
     ResponseEntity<List<CalculationDto>> retrieveAll();
 
     ResponseEntity<CalculationDto> retrieve(@NotNull(message = "Calculation ID should not be null.") UUID calculationId);

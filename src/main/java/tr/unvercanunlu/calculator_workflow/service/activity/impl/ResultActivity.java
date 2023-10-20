@@ -1,8 +1,8 @@
 package tr.unvercanunlu.calculator_workflow.service.activity.impl;
 
+import io.temporal.workflow.Workflow;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tr.unvercanunlu.calculator_workflow.model.entity.Operand;
@@ -18,7 +18,7 @@ import tr.unvercanunlu.calculator_workflow.service.activity.IResultActivity;
 @RequiredArgsConstructor
 public class ResultActivity implements IResultActivity {
 
-    private final Logger logger = LoggerFactory.getLogger(ResultActivity.class);
+    private final Logger workflowLogger = Workflow.getLogger(ResultActivity.class);
 
     private final IOperandRepository operandRepository;
 
@@ -29,19 +29,21 @@ public class ResultActivity implements IResultActivity {
     @Override
     @Transactional
     public Result create(CreateResultRequest request) {
+        this.workflowLogger.info("Create in Result Activity is started.");
+
         Operation operation = this.operationRepository.findById(request.getOperationCode())
                 .orElseThrow(() -> new RuntimeException("Operation with " + request.getOperationCode() + " Code cannot be found."));
 
-        this.logger.info("Operation with " + request.getOperationCode() + " Code is fetched from the database.");
+        this.workflowLogger.info("Operation with " + request.getOperationCode() + " Code is fetched from the database.");
 
-        this.logger.debug("Fetched Operation: " + operation);
+        this.workflowLogger.debug("Fetched Operation: " + operation);
 
         Operand operand = this.operandRepository.findById(request.getOperandId())
                 .orElseThrow(() -> new RuntimeException("Operand with " + request.getOperandId() + " ID cannot be found."));
 
-        this.logger.info("Operand with " + request.getOperandId() + " ID is fetched from the database.");
+        this.workflowLogger.info("Operand with " + request.getOperandId() + " ID is fetched from the database.");
 
-        this.logger.debug("Fetched Operand: " + operand);
+        this.workflowLogger.debug("Fetched Operand: " + operand);
 
         Double resultValue = switch (operation.getCode()) {
             case 0 -> (double) operand.getFirst() + (double) operand.getSecond();
@@ -61,15 +63,17 @@ public class ResultActivity implements IResultActivity {
                 .calculationId(request.getCalculationId())
                 .build();
 
-        this.logger.info("Result is created.");
+        this.workflowLogger.info("Result is created.");
 
-        this.logger.debug("Created Result: " + result);
+        this.workflowLogger.debug("Created Result: " + result);
 
         result = this.resultRepository.save(result);
 
-        this.logger.info("Created Result is saved into the database.");
+        this.workflowLogger.info("Created Result is saved into the database.");
 
-        this.logger.debug("Saved Result: " + result);
+        this.workflowLogger.debug("Saved Result: " + result);
+
+        this.workflowLogger.info("Create in Result Activity is completed.");
 
         return result;
     }

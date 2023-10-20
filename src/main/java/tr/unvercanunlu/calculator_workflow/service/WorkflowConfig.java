@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 import tr.unvercanunlu.calculator_workflow.service.activity.ICalculationActivity;
 import tr.unvercanunlu.calculator_workflow.service.activity.IOperandActivity;
 import tr.unvercanunlu.calculator_workflow.service.activity.IResultActivity;
+import tr.unvercanunlu.calculator_workflow.service.workflow.IAsyncCalculatorWorkflow;
 import tr.unvercanunlu.calculator_workflow.service.workflow.ICalculatorWorkflow;
 
 import java.time.Duration;
@@ -24,12 +25,20 @@ public class WorkflowConfig {
 
     // public static final String NAMESPACE = "CALCULATOR";
 
-    public static final String ID = "CALCULATOR_WORKFLOW";
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static class ID {
+
+        public static final String WORKFLOW = "CALCULATOR_WORKFLOW";
+
+        public static final String ASYNC_WORKFLOW = "ASYNC_CALCULATOR_WORKFLOW";
+    }
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     public static class TaskQueue {
 
         public static final String CALCULATOR = "CALCULATOR_TASK_QUEUE";
+
+        public static final String ASYNC_CALCULATOR = "ASYNC_CALCULATOR_TASK_QUEUE";
 
         public static final String CALCULATION = "CALCULATION_TASK_QUEUE";
 
@@ -81,8 +90,19 @@ public class WorkflowConfig {
 
             public static final WorkflowOptions CALCULATOR =
                     WorkflowOptions.newBuilder()
-                            .setWorkflowId(WorkflowConfig.ID)
+                            .setWorkflowId(WorkflowConfig.ID.WORKFLOW)
                             .setTaskQueue(WorkflowConfig.TaskQueue.CALCULATOR)
+                            .setWorkflowTaskTimeout(Duration.ofMinutes(1))
+                            .setWorkflowRunTimeout(Duration.ofMinutes(1))
+                            .setRetryOptions(RetryOptions.newBuilder()
+                                    .setMaximumAttempts(3)
+                                    .build())
+                            .build();
+
+            public static final WorkflowOptions ASYNC_CALCULATOR =
+                    WorkflowOptions.newBuilder()
+                            .setWorkflowId(WorkflowConfig.ID.ASYNC_WORKFLOW)
+                            .setTaskQueue(WorkflowConfig.TaskQueue.ASYNC_CALCULATOR)
                             .setWorkflowTaskTimeout(Duration.ofMinutes(1))
                             .setWorkflowRunTimeout(Duration.ofMinutes(1))
                             .setRetryOptions(RetryOptions.newBuilder()
@@ -112,6 +132,12 @@ public class WorkflowConfig {
         WorkflowClient client = WorkflowConfig.getClient();
 
         return client.newWorkflowStub(ICalculatorWorkflow.class, WorkflowConfig.Options.Workflow.CALCULATOR);
+    }
+
+    public static IAsyncCalculatorWorkflow getAsyncCalculatorWorkflow() {
+        WorkflowClient client = WorkflowConfig.getClient();
+
+        return client.newWorkflowStub(IAsyncCalculatorWorkflow.class, WorkflowConfig.Options.Workflow.ASYNC_CALCULATOR);
     }
 
     public static ICalculationActivity getCalculationActivity() {

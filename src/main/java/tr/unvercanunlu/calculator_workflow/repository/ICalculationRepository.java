@@ -32,7 +32,7 @@ public interface ICalculationRepository extends JpaRepository<Calculation, UUID>
     @Query(value = "UPDATE \"calculation\" " +
             "SET \"calculation\".\"done\" = :done " +
             "WHERE \"calculation\".\"id\" = :calculationId", nativeQuery = true)
-    void setDone(
+    void setCompleteness(
             @Param(value = "calculationId") UUID calculationId,
             @Param(value = "done") Boolean done);
 

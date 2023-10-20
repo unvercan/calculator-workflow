@@ -3,6 +3,7 @@ package tr.unvercanunlu.calculator_workflow.service.worker;
 import io.temporal.client.WorkflowClient;
 import io.temporal.worker.Worker;
 import io.temporal.worker.WorkerFactory;
+import io.temporal.workflow.Functions;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -12,9 +13,12 @@ import tr.unvercanunlu.calculator_workflow.service.WorkflowConfig;
 import tr.unvercanunlu.calculator_workflow.service.activity.ICalculationActivity;
 import tr.unvercanunlu.calculator_workflow.service.activity.IOperandActivity;
 import tr.unvercanunlu.calculator_workflow.service.activity.IResultActivity;
+import tr.unvercanunlu.calculator_workflow.service.workflow.IAsyncCalculatorWorkflow;
 import tr.unvercanunlu.calculator_workflow.service.workflow.ICalculatorWorkflow;
+import tr.unvercanunlu.calculator_workflow.service.workflow.impl.AsyncCalculatorWorkflow;
 import tr.unvercanunlu.calculator_workflow.service.workflow.impl.CalculatorWorkflow;
 
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -41,39 +45,55 @@ public class WorkerConfig {
 
         this.logger.info("Creation of Workers using Worker Factory is starting.");
 
-        Worker workflowWorker = workerFactory.newWorker(WorkflowConfig.TaskQueue.CALCULATOR);
+        Map<String, AbstractMap.SimpleEntry<Class, Functions.Func>> taskQueueWorkflowMap = new HashMap<>() {{
+            put(WorkflowConfig.TaskQueue.CALCULATOR,
+                    new SimpleEntry<>(ICalculatorWorkflow.class, CalculatorWorkflow::new));
+            put(WorkflowConfig.TaskQueue.ASYNC_CALCULATOR,
+                    new SimpleEntry<>(IAsyncCalculatorWorkflow.class, AsyncCalculatorWorkflow::new));
+        }};
 
-        this.logger.info("Worker for " + WorkflowConfig.TaskQueue.CALCULATOR + " Task Queue is created using Worker Factory.");
+        Map<String, Worker> taskQueueWorkflowWorkerMap = taskQueueWorkflowMap.keySet().stream().map(taskQueue -> {
+            Worker workflowWorker = workerFactory.newWorker(taskQueue);
 
-        workflowWorker.registerWorkflowImplementationFactory(ICalculatorWorkflow.class, CalculatorWorkflow::new);
+            this.logger.info("Worker for " + taskQueue + " Task Queue is created using Worker Factory.");
 
-        this.logger.info("Worker for " + WorkflowConfig.TaskQueue.CALCULATOR + " Task Queue is registered for Calculator Workflow to Worker Factory.");
+            return Map.entry(taskQueue, workflowWorker);
+        }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        Map<String, Object> taskQueueActivityMap = new HashMap<>() {{
+        taskQueueWorkflowMap.forEach((taskQueue, workflowInterfaceWithGenerator) -> {
+            Worker workflowWorker = taskQueueWorkflowWorkerMap.get(taskQueue);
+
+            Class workflowInterface = workflowInterfaceWithGenerator.getKey();
+
+            Functions.Func workflowInstanceGenerator = workflowInterfaceWithGenerator.getValue();
+
+            workflowWorker.registerWorkflowImplementationFactory(workflowInterface, workflowInstanceGenerator);
+
+            this.logger.info("Worker for " + taskQueue + " Task Queue is registered for "
+                    + workflowInterface.getClass().getSimpleName() + " to Worker Factory.");
+        });
+
+        Map<String, Object> taskQueueActivityInstanceMap = new HashMap<>() {{
             put(WorkflowConfig.TaskQueue.CALCULATION, calculationActivity);
             put(WorkflowConfig.TaskQueue.OPERAND, operandActivity);
             put(WorkflowConfig.TaskQueue.RESULT, resultActivity);
         }};
 
-        Map<Object, Worker> activityWorkerMap = taskQueueActivityMap.entrySet()
-                .stream()
-                .map(entry -> {
-                    String taskQueue = entry.getKey();
-                    Object activity = entry.getValue();
+        Map<String, Worker> taskQueueActivityWorkerMap = taskQueueActivityInstanceMap.keySet().stream().map(taskQueue -> {
+            Worker activityWorker = workerFactory.newWorker(taskQueue);
 
-                    Worker activityWorker = workerFactory.newWorker(taskQueue);
+            this.logger.info("Worker for " + taskQueue + " Task Queue is created using Worker Factory.");
 
-                    this.logger.info("Worker for " + taskQueue + " Task Queue is created using Worker Factory.");
+            return Map.entry(taskQueue, activityWorker);
+        }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-                    return Map.entry(activity, activityWorker);
-                }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        taskQueueActivityInstanceMap.forEach((taskQueue, activityInstance) -> {
+            Worker activityWorker = taskQueueActivityWorkerMap.get(taskQueue);
 
-        taskQueueActivityMap.forEach((taskQueue, activity) -> {
-            Worker activityWorker = activityWorkerMap.get(activity);
+            activityWorker.registerActivitiesImplementations(activityInstance);
 
-            activityWorker.registerActivitiesImplementations(activity);
-
-            this.logger.info("Worker for " + taskQueue + " Task Queue is registered for " + activity.getClass().getSimpleName() + " to Worker Factory.");
+            this.logger.info("Worker for " + taskQueue + " Task Queue is registered for "
+                    + activityInstance.getClass().getSimpleName() + " to Worker Factory.");
         });
 
         this.logger.info("Creation of Workers using Worker Factory is completed.");
